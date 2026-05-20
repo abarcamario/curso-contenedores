@@ -76,20 +76,16 @@ spec:
         stage('CD - Empaquetado y distribucion') {
             steps {
                 container('kaniko') {
-                    // Cargamos de forma segura las credenciales de Jenkins creadas al principio
                     withCredentials([
                         usernamePassword(credentialsId: 'dh-credencial', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
                         usernamePassword(credentialsId: 'gh-credencial', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')
                     ]) {
                         sh '''
-                            # Creamos la estructura de directorios requerida por Kaniko
                             mkdir -p /kaniko/.docker
                             
-                            # Convertimos los accesos a formato Base64 sin saltos de línea
                             DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\n')
                             GH_AUTH=$(echo -n "${GH_USER}:${GH_PASS}" | base64 | tr -d '\n')
                             
-                            # Generamos el archivo config.json dinámicamente con las credenciales
                             cat <<EOF > /kaniko/.docker/config.json
                             {
                                 "auths": {
@@ -99,7 +95,7 @@ spec:
                             }
                             EOF
                             
-                            # Ejecutamos el compilador de Kaniko autenticado
+                            # ESTA ES LA LÍNEA QUE FALTABA EJECUTAR CON LAS CREDENCIALES
                             /kaniko/executor \
                               --context=. \
                               --dockerfile=./Dockerfile \
