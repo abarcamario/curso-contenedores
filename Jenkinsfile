@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
     
     environment {
         IMAGE_NAME = 'curso-contenedores'
@@ -12,7 +12,6 @@ pipeline {
             agent {
                 docker {
                     image 'ghcr.io/pnpm/pnpm:latest'
-                    label 'docker'
                 }
             }
             
@@ -53,9 +52,7 @@ pipeline {
         }
         
         stage('CD - Empaquetado y distribucion') {
-            agent { 
-                label 'docker' 
-            }
+            agent any
             steps {
                 sh '''
                     docker build -t ${IMAGE_NAME}:latest .
