@@ -15,6 +15,9 @@ spec:
     tty: true
   - name: docker
     image: docker:24.0.7-dind
+    env:
+    - name: DOCKER_TLS_CERTDIR
+      value: ""
     securityContext:
       privileged: true
     command: ['cat']
@@ -27,6 +30,7 @@ spec:
         IMAGE_NAME = 'curso-contenedores'
         DH_REPO    = 'abarcamario/curso-contenedores'
         GH_REPO    = 'ghcr.io/abarcamario/curso-contenedores'
+        DOCKER_HOST = 'tcp://localhost:2375'
     }
     
     stages {
