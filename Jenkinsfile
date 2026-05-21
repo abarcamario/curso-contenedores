@@ -80,16 +80,15 @@ spec:
                         usernamePassword(credentialsId: 'dh-credencial', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
                         usernamePassword(credentialsId: 'gh-credencial', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')
                     ]) {
-                        // Paso 1: Generamos el archivo de configuración apuntando a la URL del index oficial
+                        // Cambiado a formato de comillas simples para asegurar la inyección de la URL del index
                         sh '''
                             mkdir -p /kaniko/.docker
                             DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\n')
                             GH_AUTH=$(echo -n "${GH_USER}:${GH_PASS}" | base64 | tr -d '\n')
                             
-                            echo "{\\"auths\\":{\\"https://docker.io\\":{\\"auth\\":\\"${DH_AUTH}\\"},\\"https://ghcr.io\\":{\\"auth\\":\\"${GH_AUTH}\\"}}}" > /kaniko/.docker/config.json
+                            echo '{"auths":{"https://docker.io":{"auth":"'$DH_AUTH'"},"https://ghcr.io":{"auth":"Layout\\/\\/'$GH_AUTH'"}}}' > /kaniko/.docker/config.json
                         '''
                         
-                        // Paso 2: Ejecutamos el compilador de Kaniko de manera limpia
                         sh '/kaniko/executor --context=dir://. --dockerfile=./Dockerfile --destination=${DH_REPO}:latest --destination=${GH_REPO}:latest'
                     }
                 }
