@@ -80,7 +80,7 @@ spec:
                         usernamePassword(credentialsId: 'dh-credencial', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
                         usernamePassword(credentialsId: 'gh-credencial', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')
                     ]) {
-                        // Paso 1: Creamos la autenticación de forma aislada
+                        // Paso 1: Creamos la autenticación usando la URL oficial del index de Docker Hub
                         sh '''
                             mkdir -p /kaniko/.docker
                             DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\n')
@@ -89,7 +89,7 @@ spec:
                             echo "{\\"auths\\":{\\"https://docker.io\\":{\\"auth\\":\\"${DH_AUTH}\\"},\\"https://ghcr.io\\":{\\"auth\\":\\"${GH_AUTH}\\"}}}" > /kaniko/.docker/config.json
                         '''
                         
-                        // Paso 2: Ejecutamos Kaniko en un comando limpio separado
+                        // Paso 2: Ejecutamos Kaniko de forma limpia
                         sh '/kaniko/executor --context=dir://. --dockerfile=./Dockerfile --destination=${DH_REPO}:latest --destination=${GH_REPO}:latest'
                     }
                 }
