@@ -80,27 +80,17 @@ spec:
                         usernamePassword(credentialsId: 'dh-credencial', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
                         usernamePassword(credentialsId: 'gh-credencial', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')
                     ]) {
+                        // Paso 1: Creamos la autenticación de forma aislada
                         sh '''
                             mkdir -p /kaniko/.docker
-                            
                             DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\n')
                             GH_AUTH=$(echo -n "${GH_USER}:${GH_PASS}" | base64 | tr -d '\n')
                             
-                            cat <<EOF > /kaniko/.docker/config.json
-                            {
-                                "auths": {
-                                    "https://docker.io": { "auth": "${DH_AUTH}" },
-                                    "https://ghcr.io": { "auth": "${GH_AUTH}" }
-                                }
-                            }
-                            EOF
-                            
-                            /kaniko/executor \
-                              --context=. \
-                              --dockerfile=./Dockerfile \
-                              --destination=${DH_REPO}:latest \
-                              --destination=${GH_REPO}:latest
+                            echo "{\\"auths\\":{\\"https://docker.io\\":{\\"auth\\":\\"${DH_AUTH}\\"},\\"https://ghcr.io\\":{\\"auth\\":\\"${GH_AUTH}\\"}}}" > /kaniko/.docker/config.json
                         '''
+                        
+                        // Paso 2: Ejecutamos Kaniko en un comando limpio separado
+                        sh '/kaniko/executor --context=dir://. --dockerfile=./Dockerfile --destination=${DH_REPO}:latest --destination=${GH_REPO}:latest'
                     }
                 }
             }
