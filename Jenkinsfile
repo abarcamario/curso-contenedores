@@ -72,7 +72,7 @@ spec:
                 }
             }
         }
-        
+    
         stage('CD - Empaquetado y distribucion') {
             steps {
                 container('kaniko') {
@@ -95,7 +95,6 @@ spec:
                             }
                             EOF
                             
-                            # ESTA ES LA LÍNEA QUE FALTABA EJECUTAR CON LAS CREDENCIALES
                             /kaniko/executor \
                               --context=. \
                               --dockerfile=./Dockerfile \
