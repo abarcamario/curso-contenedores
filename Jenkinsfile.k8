@@ -20,5 +20,25 @@ spec:
                 sh 'echo "mensaje desde el terminal"'
             }
         }
+        stage('Segundo paso') {
+            agent {
+                kubernetes {
+                    yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: node
+      image: node:24
+      command:
+        - cat
+      tty: true
+'''
+                }
+            }
+            steps {
+                sh 'node --version'
+            }
+        }
     }
 }
