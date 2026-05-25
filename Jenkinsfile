@@ -80,17 +80,19 @@ spec:
                         usernamePassword(credentialsId: 'dh-credencial', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS'),
                         usernamePassword(credentialsId: 'gh-credencial', usernameVariable: 'GH_USER', passwordVariable: 'GH_PASS')
                     ]) {
-                        // Paso 1: Usamos printf para forzar la escritura literal exacta del JSON
                         sh '''
                             mkdir -p /kaniko/.docker
-                            DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\n')
-                            GH_AUTH=$(echo -n "${GH_USER}:${GH_PASS}" | base64 | tr -d '\n')
+                            DH_AUTH=$(echo -n "${DH_USER}:${DH_PASS}" | base64 | tr -d '\\n')
+                            GH_AUTH=$(echo -n "${GH_USER}:${GH_PASS}" | base64 | tr -d '\\n')
                             
-                            printf '{"auths":{"https://docker.io":{"auth":"%s"},"https://ghcr.io":{"auth":"%s"}}}' "$DH_AUTH" "$GH_AUTH" > /kaniko/.docker/config.json
+                            echo "{\\"auths\\":{\\"https://index.docker.io/v1/\\":{\\"auth\\":\\"$DH_AUTH\\"},\\"ghcr.io\\":{\\"auth\\":\\"$GH_AUTH\\"}}}" > /kaniko/.docker/config.json
+                            
+                            /kaniko/executor \
+                              --context=dir://. \
+                              --dockerfile=./Dockerfile \
+                              --destination=${DH_REPO}:latest \
+                              --destination=${GH_REPO}:latest
                         '''
-                        
-                        // Paso 2: Ejecutamos el compilador de Kaniko de manera limpia
-                        sh '/kaniko/executor --context=dir://. --dockerfile=./Dockerfile --destination=${DH_REPO}:latest --destination=${GH_REPO}:latest'
                     }
                 }
             }
