@@ -1,17 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: herramientas
-      image: alpine:3.23
-      command:
-        - cat
-      tty: true
-'''
+            defaultContainer 'herramientas'
+            yamlFile 'agent-node.yaml'
         }
     }
     stages {
@@ -21,23 +12,18 @@ spec:
             }
         }
         stage('Segundo paso') {
-            agent {
-                kubernetes {
-                    yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: node
-      image: node:24
-      command:
-        - cat
-      tty: true
-'''
+            steps {
+                container('node') {
+                    sh 'node --version'
+                    sh 'npm --version'
                 }
             }
+        }
+        stage('Tercer paso') {
             steps {
-                sh 'node --version'
+                container('kubectl') {
+                    sh 'kubectl version --client'
+                }
             }
         }
     }
